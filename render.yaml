@@ -1,0 +1,67 @@
+services:
+  # ============================================================================
+  # 1. VeriDoc AI - Backend Express API (Render Web Service)
+  # ============================================================================
+  - type: web
+    name: veridoc-ai-backend
+    runtime: node
+    rootDir: backend
+    plan: standard
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CLIENT_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: MAX_FILE_SIZE_MB
+        value: "25"
+      - key: MAX_UPLOAD_FILES
+        value: "10"
+
+  # ============================================================================
+  # 2. VeriDoc AI - Python AI Background Worker (Render Background Worker)
+  # ============================================================================
+  - type: worker
+    name: veridoc-ai-worker
+    runtime: docker
+    rootDir: ai-worker
+    dockerfilePath: Dockerfile
+    plan: standard
+    region: oregon
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: SUPABASE_STORAGE_BUCKET
+        value: documents
+      - key: JOB_POLL_INTERVAL_SECONDS
+        value: "5"
+      - key: JOB_MAX_ATTEMPTS
+        value: "3"
+      - key: JOB_STALE_AFTER_MINUTES
+        value: "20"
+      - key: MAX_FILE_SIZE_MB
+        value: "25"
+      - key: MAX_PDF_PAGES
+        value: "200"
+      - key: MAX_OCR_PAGES
+        value: "100"
+      - key: GEMINI_MAX_RETRIES
+        value: "2"
+
